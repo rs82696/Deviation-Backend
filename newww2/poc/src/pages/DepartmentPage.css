@@ -1,0 +1,349 @@
+/* ==========================
+   GLOBAL STYLES
+========================== */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #f4f6f9;
+  color: #333;
+  line-height: 1.5;
+  scroll-behavior: smooth;
+}
+
+/* ==========================
+   PAGE WRAPPER
+========================== */
+.page-wrapper {
+  background: linear-gradient(160deg, #f9fafc, #edf1f7);
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* ==========================
+   NAVBAR STYLES
+========================== */
+.navbar {
+  width: 100%;
+  background: linear-gradient(90deg, #0056d6, #007bff);
+  padding: 15px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-logo {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 25px;
+}
+
+.navbar-link {
+  color: #f1f5ff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 16px;
+}
+
+.navbar-link:hover {
+  color: #fff;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+.navbar-right button {
+  background: linear-gradient(135deg, #ff6a00, #ff9900);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navbar-right button:hover {
+  background: linear-gradient(135deg, #ff9900, #ff6a00);
+  transform: translateY(-2px);
+}
+
+/* ==========================
+   DASHBOARD TITLES
+========================== */
+.dashboard-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0056d6;
+  text-align: center;
+  text-transform: uppercase;
+  margin: 40px 0 30px;
+  letter-spacing: 1px;
+  border-bottom: 3px solid #007bff;
+  padding-bottom: 15px;
+  width: fit-content;
+}
+
+/* ==========================
+   SECTION SUB-TITLES
+========================== */
+.section-subtitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #0048b3;
+  margin: 25px 0 15px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* ==========================
+   DROPDOWN SECTION
+========================== */
+.dropdown-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 10px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.dropdown-item label {
+  font-weight: 600;
+  font-size: 15px;
+  color: #222;
+  min-width: 150px;
+}
+
+.dropdown-item select {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #bbb;
+  font-size: 15px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+.dropdown-item select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+  outline: none;
+}
+
+/* ==========================
+   TABLE SECTION
+========================== */
+.table-wrapper {
+  width: 95%;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.table-scroll {
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.dept-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.dept-table th,
+.dept-table td {
+  border: 1px solid #ddd;
+  padding: 14px;
+  font-size: 15px;
+}
+
+.dept-table th {
+  background: linear-gradient(90deg, #007bff, #0056d6);
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.4px;
+}
+
+.dept-table tr:nth-child(even) {
+  background-color: #f6f8ff;
+}
+
+.dept-table tr:hover {
+  background-color: #eef4ff;
+  transition: background-color 0.3s ease;
+}
+
+/* ==========================
+   ACTION BUTTONS
+========================== */
+.action-buttons-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin: 50px 0;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  min-width: 150px;
+}
+
+/* ✅ Buttons with gradients */
+.action-button.next {
+  background: linear-gradient(135deg, #007bff, #0056d6);
+}
+.action-button.next:hover {
+  background: linear-gradient(135deg, #0056d6, #0040aa);
+  transform: translateY(-2px);
+}
+
+.action-button.save-exit {
+  background: linear-gradient(135deg, #fd7e14, #e65c00);
+}
+.action-button.save-exit:hover {
+  background: linear-gradient(135deg, #e65c00, #cc4a00);
+  transform: translateY(-2px);
+}
+
+.action-button.exit {
+  background: linear-gradient(135deg, #6c757d, #565e64);
+}
+.action-button.exit:hover {
+  background: linear-gradient(135deg, #565e64, #444b50);
+  transform: translateY(-2px);
+}
+
+/* ==========================
+   DASHBOARD GRID BOXES
+========================== */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+  width: 100%;
+  max-width: 1300px;
+  margin: 40px auto;
+}
+
+.dashboard-box {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid #e3e3e3;
+}
+
+.dashboard-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+.box-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+.box-value {
+  font-size: 34px;
+  font-weight: 700;
+  color: #007bff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* ==========================
+   RESPONSIVE DESIGN
+========================== */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 15px 20px;
+  }
+
+  .navbar-links {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .dashboard-title {
+    font-size: 26px;
+  }
+
+  .dropdown-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .dropdown-item {
+    width: 90%;
+    justify-content: space-between;
+  }
+
+  .table-wrapper {
+    width: 100%;
+  }
+
+  .action-buttons-wrapper {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+}

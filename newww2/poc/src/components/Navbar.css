@@ -1,0 +1,156 @@
+/* ==========================
+   NAVBAR STYLES
+========================== */
+
+/* ===== Header (Top Bar) ===== */
+.top-bar {
+  background-color: #007bff;
+  color: white;
+  padding: 15px 50px;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.title-area {
+  flex-grow: 1;
+  margin-right: 12px;
+}
+
+.record-title {
+  font-size: 22px;
+  margin: 0;
+  font-weight: 600;
+  position: "absolute",
+}
+
+.record-sub {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 3px;
+}
+.Home-btn {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-right: 12px;
+  cursor: pointer;
+}
+.Department-btn {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-right: 12px;
+  cursor: pointer;
+}
+.logout-btn {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #b91c1c;
+}
+/* ===== Tabs Section ===== */
+.tabs {
+  display: flex;
+  justify-content: space-evenly;
+  background-color: #e9ecef;
+  padding: 0 25px;
+  border-bottom: 1px solid #dee2e6;
+  width: 100%;               /* changed from 100vw */
+  box-sizing: border-box;
+  overflow-x: auto;          /* allow scroll when needed */
+  flex-wrap: nowrap;
+}
+
+.tab {
+  flex: 1;
+  padding: 14px 22px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: #495057;
+  border-bottom: 3px solid transparent;
+  transition: all 0.25s ease-in-out;
+  white-space: nowrap;
+  text-align: center;
+  font-size: 15px;
+}
+
+.tab.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  background-color: #fff;
+  font-weight: 600;
+}
+
+.tab:hover:not(.active):not(.disabled) {
+  color: #0056b3;
+  background-color: #f8f9fa;
+}
+
+/* ===== Disabled Tabs ===== */
+.tab.disabled,
+.tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+  color: #6c757d;
+  border-bottom: 3px solid transparent;
+}
+
+/* ===== Focus (Keyboard Navigation) ===== */
+.tab:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* ===== Scrollbar Styling (optional) ===== */
+.tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+  .top-bar {
+    padding: 10px 16px;
+  }
+
+  .record-title {
+    font-size: 18px;
+  }
+
+  .record-sub {
+    font-size: 12px;
+  }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}

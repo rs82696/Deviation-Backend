@@ -1,0 +1,122 @@
+.login-container {
+  height: 100vh;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-wrapper {
+  display: flex;
+  width: 800px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.login-image {
+  width: 50%;
+  background: #f4f6f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-image img {
+  width: 90%;
+  height: auto;
+}
+
+.login-box {
+  width: 50%;
+  padding: 40px;
+  text-align: center;
+}
+
+.login-box h2 {
+  margin-bottom: 20px;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.login-box button {
+  width: 100%;
+  padding: 10px;
+  background-color: #2a5298;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login-box button:hover {
+  background-color: #1e3c72;
+}
+/* FULL PAGE CENTERING */
+.login-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to right, #1e3a8a, #3b82f6);
+}
+
+/* WRAPPER */
+.auth-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* IMAGE FIX */
+.auth-image-small img {
+  width: 250px;   /* increased but controlled */
+  height: auto;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+/* FORM CARD */
+.login-box {
+  width: 350px;
+  padding: 25px;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+/* INPUTS */
+.login-box input,
+.login-box select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* BUTTON */
+.login-box button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  border: none;
+  background-color: #1e3a8a;
+  color: white;
+  cursor: pointer;
+}
+
+/* SECONDARY BUTTON */
+.secondary-btn {
+  background-color: #e5e7eb !important;
+  color: black !important;
+}

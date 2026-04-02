@@ -1,0 +1,191 @@
+/* Container */
+.capa-container {
+width: 90%;
+max-width: 1000px;
+margin: 30px auto;
+background: #ffffff;
+padding: 25px 30px;
+border-radius: 12px;
+box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+color: #222;
+transition: all 0.3s ease;
+}
+
+/* Title */
+.capa-title {
+text-align: center;
+font-size: 24px;
+font-weight: 700;
+color: #1a3765;
+margin-bottom: 25px;
+letter-spacing: 0.5px;
+}
+
+/* Each section */
+.capa-section {
+margin-bottom: 20px;
+border-bottom: 1px solid #e1e1e1;
+padding-bottom: 18px;
+}
+
+.capa-section-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 10px;
+}
+
+.capa-section h3 {
+margin: 0;
+font-size: 17px;
+font-weight: 700;
+color: #1e2a4d;
+}
+
+/* NA checkbox */
+.capa-na {
+display: flex;
+align-items: center;
+gap: 10px;
+font-size: 14px;
+color: #555;
+}
+
+/* Editor wrapper */
+.capa-editor {
+border: 1px solid #c5cde6;
+border-radius: 8px;
+padding: 10px;
+background: #f8f9ff;
+transition: all 0.2s ease-in-out;
+}
+
+.capa-editor:hover {
+border-color: #8aa4e2;
+box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.capa-editor.disabled {
+opacity: 0.6;
+background: #f0f2f7;
+}
+
+/* Toolbar */
+.capa-toolbar {
+display: flex;
+gap: 10px;
+margin-bottom: 10px;
+}
+
+.capa-toolbar button {
+padding: 6px 12px;
+border-radius: 6px;
+border: 1px solid #aab4d0;
+background: #ffffff;
+cursor: pointer;
+font-weight: 700;
+min-width: 36px;
+text-align: center;
+transition: all 0.2s ease;
+}
+
+.capa-toolbar button:hover {
+background: #e1ebff;
+border-color: #7b94e0;
+}
+
+/* Editor body (contentEditable) */
+.capa-editor-body {
+min-height: 120px;
+padding: 10px;
+border-radius: 6px;
+outline: none;
+white-space: pre-wrap;
+color: #222;
+font-size: 15px;
+background: #fff;
+}
+
+/* Placeholder style */
+.capa-editor-body:empty:before {
+content: attr(data-placeholder);
+color: #aaa;
+pointer-events: none;
+font-style: italic;
+}
+
+/* Reviewer remarks */
+.capa-reviewer {
+margin-top: 18px;
+margin-bottom: 20px;
+}
+
+.capa-label {
+display: block;
+font-weight: 700;
+margin-bottom: 8px;
+}
+
+.capa-reviewer-text {
+width: 100%;
+min-height: 100px;
+padding: 12px;
+font-size: 15px;
+border-radius: 8px;
+border: 1px solid #c5cde6;
+resize: vertical;
+transition: border 0.2s ease;
+}
+
+.capa-reviewer-text:focus {
+border-color: #7b94e0;
+box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Buttons row */
+.capa-buttons {
+display: flex;
+justify-content: flex-end;
+gap: 15px;
+margin-top: 20px;
+flex-wrap: wrap;
+}
+
+.capa-btn {
+min-width: 140px;
+padding: 10px 18px;
+border-radius: 24px;
+border: none;
+font-weight: 700;
+cursor: pointer;
+transition: all 0.2s ease;
+}
+
+/* Individual button styles */
+.capa-btn.back {
+background: #e4e7eb;
+color: #333;
+}
+
+.capa-btn.back:hover {
+background: #d0d4da;
+}
+
+.capa-btn.save {
+background: #34c759;
+color: #fff;
+}
+
+.capa-btn.save:hover {
+background: #28a745;
+}
+
+.capa-btn.exit {
+background: #ffcc66;
+color: #5a3e00;
+}
+
+.capa-btn.exit:hover {
+background: #ffb84d;
+}

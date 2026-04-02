@@ -1,0 +1,121 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+}
+.page-wrapper {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+/* Headings */
+h1, h2, h3 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+/* 🔘 Buttons */
+.btn,
+.action-button,
+button {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #fff;
+}
+button:hover,
+.action-button:hover,
+.btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+/* 🎨 Button Colors */
+.createButton,
+.btn-save {
+  background-color: #28a745; /* green */
+}
+.btn-exit {
+  background-color: #6c757d; /* gray */
+}
+.btn-next {
+  background-color: #007bff; /* blue */
+}
+.btn-save-exit {
+  background-color: #fd7e14; /* orange */
+}
+/* 🧱 Layout Grids */
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 40px;
+}
+/* 📦 Dashboard Boxes */
+.box {
+  background: #fff;
+  border-left: 5px solid #007bff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+.box:hover {
+  transform: translateY(-4px);
+}
+.boxTitle {
+  font-size: 18px;
+  color: #555;
+}
+.boxContent {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+}
+/* 🧾 Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+}
+th, td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+th {
+  background-color: #007bff;
+  color: white;
+}
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+/* ⚙️ Action Buttons Wrapper */
+.action-buttons-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+}
+/* 🧍 Department + Form Layout */
+.form-group {
+  margin-bottom: 20px;
+}
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+input, select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}

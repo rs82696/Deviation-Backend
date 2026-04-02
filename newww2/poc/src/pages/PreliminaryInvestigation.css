@@ -1,0 +1,138 @@
+/* Main Container */
+.pi-container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 30px auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+}
+
+/* Section */
+.pi-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.pi-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pi-section h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e2a4d;
+}
+
+/* NA Checkbox */
+.pi-na {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Editor Box */
+.pi-editor {
+  border: 1px solid #c5cde6;
+  border-radius: 8px;
+  padding: 10px;
+  background: #f8f9ff;
+}
+
+.pi-editor.disabled {
+  opacity: 0.5;
+}
+
+/* Toolbar styling EXACT like screenshot */
+.pi-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.pi-toolbar button {
+  width: 34px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #b7bfd8;
+  background: white;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  color: black;
+}
+
+.pi-toolbar button:hover {
+  background: #edf0ff;
+}
+
+/* Editor Body */
+.pi-editor-body {
+  min-height: 120px;
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+}
+
+.pi-editor-body:empty:before {
+  content: attr(data-placeholder);
+  color: #999;
+  font-style: italic;
+}
+
+/* BUTTONS Area */
+.pi-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.pi-btn {
+  min-width: 140px;
+  padding: 10px 18px;
+  border-radius: 24px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+/* Individual button styles */
+.pi-btn.back {
+background: #e4e7eb;
+color: #333;
+}
+
+.pi-btn.back:hover {
+background: #d0d4da;
+}
+
+.pi-btn.save {
+background: #34c759;
+color: #fff;
+}
+
+.pi-btn.save:hover {
+background: #28a745;
+}
+
+.pi-btn.exit {
+background: #ffcc66;
+color: #5a3e00;
+}
+
+.pi-btn.exit:hover {
+background: #ffb84d;
+}
