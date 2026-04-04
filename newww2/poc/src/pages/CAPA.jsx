@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
-import "./capa.css";
+import "./CAPA.css";
 
 //const API_BASE = "http://127.0.0.1:5000";
 const API_BASE ="https://deviation-backend-z706.onrender.com";
