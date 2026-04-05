@@ -222,7 +222,7 @@ def update_incident_status_post_compat():
     except Exception as e:
         return jsonify({"message": f"Error updating status: {e}"}), 500
 
-
+"""
 @app.route("/api/incidents", methods=["GET"])
 def list_all_incidents():
     try:
@@ -283,7 +283,7 @@ def list_all_incidents():
             #progress = build_progress_text(incident_id)
             progress = "Pending"
             next_step = "Pending"
-            
+
             out.append({
                 "_id": str(d["_id"]),
                 "incident_id": incident_id,
@@ -295,6 +295,125 @@ def list_all_incidents():
                 "created_by_department": created_by_department,
                 "assigned_to_department": assigned_to_department,
                 #"next_step": compute_next_step_for_incident(incident_id),
+                "next_step": next_step,
+            })
+
+        return jsonify(out), 200
+
+    except Exception as e:
+        return jsonify({"message": f"Error listing incidents: {e}"}), 500
+"""
+@app.route("/api/incidents", methods=["GET"])
+def list_all_incidents():
+    try:
+        # ✅ Step 1: Fetch latest 10 incidents (lightweight)
+        docs = list(
+            incidents_collection.find(
+                {},
+                {
+                    "incident_id": 1,
+                    "title": 1,
+                    "status": 1,
+                    "created_at": 1,
+                    "updated_at": 1
+                }
+            )
+            .sort("created_at", -1)
+            .limit(10)
+        )
+
+        incident_ids = [d.get("incident_id") for d in docs]
+
+        # ✅ Step 2: Bulk fetch related collections
+        dept_all = list(
+            department_selection_collection.find(
+                {"incident_id": {"$in": incident_ids}}
+            )
+        )
+
+        prelim_all = list(
+            preliminary_collection.find(
+                {"incident_id": {"$in": incident_ids}}
+            )
+        )
+
+        rca_all = list(
+            rca_collection.find(
+                {"incident_id": {"$in": incident_ids}}
+            )
+        )
+
+        capa_all = list(
+            capa_collection.find(
+                {"incident_id": {"$in": incident_ids}}
+            )
+        )
+
+        qa_all = list(
+            qa_collection.find(
+                {"incident_id": {"$in": incident_ids}}
+            )
+        )
+
+        # ✅ Step 3: Build maps (O(1) lookup)
+        dept_map = {}
+        for d in dept_all:
+            iid = d.get("incident_id")
+            dept_map.setdefault(iid, []).append(d)
+
+        prelim_map = {d["incident_id"]: d for d in prelim_all}
+        rca_map = {d["incident_id"]: d for d in rca_all}
+        capa_map = {d["incident_id"]: d for d in capa_all}
+        qa_map = {d["incident_id"]: d for d in qa_all}
+
+        out = []
+
+        # ✅ Step 4: Build response (NO DB calls inside loop)
+        for d in docs:
+            incident_id = d.get("incident_id")
+
+            dept_docs = dept_map.get(incident_id, [])
+
+            created_by_department = ""
+            assigned_departments = []
+
+            if dept_docs:
+                created_by_department = dept_docs[0].get("selectedDept", "") or ""
+                assigned_departments = sorted(list({
+                    x.get("department") for x in dept_docs if x.get("department")
+                }))
+
+            assigned_to_department = ", ".join(assigned_departments) if assigned_departments else ""
+
+            status = d.get("status", "created")
+
+            # ✅ Step 5: FAST progress + next_step logic (no DB calls)
+            if incident_id in qa_map:
+                progress = "Completed"
+                next_step = "Done"
+            elif incident_id in capa_map:
+                progress = "CAPA Completed"
+                next_step = "QA Review"
+            elif incident_id in rca_map:
+                progress = "RCA Completed"
+                next_step = "CAPA"
+            elif incident_id in prelim_map:
+                progress = "Under Investigation"
+                next_step = "RCA"
+            else:
+                progress = "Created"
+                next_step = "Preliminary Investigation"
+
+            out.append({
+                "_id": str(d["_id"]),
+                "incident_id": incident_id,
+                "title": d.get("title", ""),
+                "status": status,
+                "progress": progress,
+                "created_at": d.get("created_at"),
+                "updated_at": d.get("updated_at"),
+                "created_by_department": created_by_department,
+                "assigned_to_department": assigned_to_department,
                 "next_step": next_step,
             })
 
