@@ -7,6 +7,7 @@ export default function Navbar({ activeTab, disableTabs = false }) {
   const username = localStorage.getItem("username") || "";
   const department = localStorage.getItem("department") || "";
   const incidentTitle = localStorage.getItem("incident_title") || "New Incident";
+  const today = new Date().toLocaleDateString("en-GB");
 
   const tabs = [
     { name: "General Information", path: "/general-info" },
@@ -53,7 +54,7 @@ export default function Navbar({ activeTab, disableTabs = false }) {
           <div className="record-sub">User: {username}</div>
           <div className="record-sub">Department: {department}</div>
           <div className="record-sub">Pending Data Review</div>
-          <div className="record-sub">Created: 2025-11-06</div>
+          <div className="record-sub">Created: {today}</div>
         </div>
         {/* ✅ Home Button */}
         <button className="Home-btn" onClick={handleHome}>

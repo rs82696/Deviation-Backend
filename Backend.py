@@ -221,71 +221,50 @@ def update_incident_status_post_compat():
         return jsonify({"message": "Status updated", "incident_id": incident_id, "status": status}), 200
     except Exception as e:
         return jsonify({"message": f"Error updating status: {e}"}), 500
-"""
+
+
 @app.route("/api/incidents", methods=["GET"])
 def list_all_incidents():
     try:
-        docs = list(incidents_collection.find({}).sort("created_at", -1))
+        #docs = list(incidents_collection.find({}).sort("created_at", -1))
+        docs = list(
+            incidents_collection.find(
+                {},
+                {
+                    "incident_id": 1,
+                    "title": 1,
+                    "status": 1,
+                    "created_at": 1,
+                    "updated_at": 1
+                }
+            )
+            .sort("created_at", -1)
+            .limit(10)
+        )
+
+          # ✅ Step 2: Get all incident_ids
+        incident_ids = [d.get("incident_id") for d in docs]
+
+        # ✅ Step 3: Bulk fetch department data (avoid N+1 queries)
+        dept_all = list(
+            department_selection_collection.find(
+                {"incident_id": {"$in": incident_ids}}
+            )
+        )
+
+        # ✅ Step 4: Group department data by incident_id
+        dept_map = {}
+        for d in dept_all:
+            iid = d.get("incident_id")
+            dept_map.setdefault(iid, []).append(d)
         out = []
 
         for d in docs:
             incident_id = d.get("incident_id")
 
-            dept_docs = list(department_selection_collection.find({"incident_id": incident_id}))
+            #dept_docs = list(department_selection_collection.find({"incident_id": incident_id}))
 
-            created_by_department = ""
-            assigned_departments = []
-
-            if dept_docs:
-                created_by_department = dept_docs[0].get("selectedDept", "") or ""
-                assigned_departments = sorted(list({
-                    x.get("department") for x in dept_docs if x.get("department")
-                }))
-
-            assigned_to_department = ", ".join(assigned_departments) if assigned_departments else ""
-            progress = build_progress_text(incident_id)
-            status = d.get("status", "created")
-            #status = d.get("status", "created")
-
-            if status == "approved":
-                progress = "Approved"
-            elif status == "rejected":
-                progress = "Rejected"
-            elif status == "action_required":
-                progress = "Under Review"
-            elif status == "pending":
-                progress = "In Progress"
-            else:
-                progress = "Created"
-
-            out.append({
-                "_id": str(d["_id"]),
-                "incident_id": incident_id,
-                "title": d.get("title", ""),
-                "status": status,
-                "progress": progress,
-                "created_at": d.get("created_at"),
-                "updated_at": d.get("updated_at"),
-                "created_by_department": created_by_department,
-                "assigned_to_department": assigned_to_department,
-                "next_step": compute_next_step_for_incident(incident_id),
-            })
-
-        return jsonify(out), 200
-
-    except Exception as e:
-        return jsonify({"message": f"Error listing incidents: {e}"}), 500
-"""
-@app.route("/api/incidents", methods=["GET"])
-def list_all_incidents():
-    try:
-        docs = list(incidents_collection.find({}).sort("created_at", -1))
-        out = []
-
-        for d in docs:
-            incident_id = d.get("incident_id")
-
-            dept_docs = list(department_selection_collection.find({"incident_id": incident_id}))
+            dept_docs = dept_map.get(incident_id, [])
 
             created_by_department = ""
             assigned_departments = []
