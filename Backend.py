@@ -325,11 +325,15 @@ def list_all_incidents():
         incident_ids = [d.get("incident_id") for d in docs]
 
         # ✅ Step 2: Bulk fetch related collections
+    
         dept_all = list(
-            department_selection_collection.find(
+        department_selection_collection.find(
                 {"incident_id": {"$in": incident_ids}}
             )
         )
+
+        general_all = list(general_info_collection.find({"incident_id": {"$in": incident_ids}}))
+        deviation_all = list(deviation_info_collection.find({"incident_id": {"$in": incident_ids}}))
 
         prelim_all = list(
             preliminary_collection.find(
@@ -354,16 +358,19 @@ def list_all_incidents():
                 {"incident_id": {"$in": incident_ids}}
             )
         )
+        evaluation_all = list(evaluation_collection.find({"incident_id": {"$in": incident_ids}}))
 
         # ✅ Step 3: Build maps (O(1) lookup)
         dept_map = {}
         for d in dept_all:
             iid = d.get("incident_id")
             dept_map.setdefault(iid, []).append(d)
-
+        general_map = {d["incident_id"]: d for d in general_all}
+        deviation_map = {d["incident_id"]: d for d in deviation_all}
         prelim_map = {d["incident_id"]: d for d in prelim_all}
         rca_map = {d["incident_id"]: d for d in rca_all}
         capa_map = {d["incident_id"]: d for d in capa_all}
+        evaluation_map = {d["incident_id"]: d for d in evaluation_all}
         qa_map = {d["incident_id"]: d for d in qa_all}
 
         out = []
@@ -389,20 +396,36 @@ def list_all_incidents():
 
             # ✅ Step 5: FAST progress + next_step logic (no DB calls)
             if incident_id in qa_map:
-                progress = "Completed"
-                next_step = "Done"
+                    progress = "Completed"
+                    next_step = "Done"
+
+            elif incident_id in evaluation_map:
+                progress = "Evaluation Completed"
+                next_step = "QA Review"
+
             elif incident_id in capa_map:
                 progress = "CAPA Completed"
-                next_step = "QA Review"
+                next_step = "Evaluation Comments"
+
             elif incident_id in rca_map:
                 progress = "RCA Completed"
                 next_step = "CAPA"
+
             elif incident_id in prelim_map:
                 progress = "Under Investigation"
                 next_step = "RCA"
+
+            elif incident_id in deviation_map:
+                progress = "Deviation Recorded"
+                next_step = "Preliminary Investigation"
+
+            elif incident_id in general_map:
+                progress = "General Info Submitted"
+                next_step = "Deviation Entry"
+
             else:
                 progress = "Created"
-                next_step = "Preliminary Investigation"
+                next_step = "General Information"
 
             out.append({
                 "_id": str(d["_id"]),
