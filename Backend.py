@@ -277,10 +277,10 @@ def list_all_incidents():
 
             assigned_to_department = ", ".join(assigned_departments) if assigned_departments else ""
 
-            status = d.get("status", "created")
+            #status = d.get("status", "created")
 
             # IMPORTANT: use department-wise progress message
-            progress = build_progress_text(incident_id)
+            #progress = build_progress_text(incident_id)
 
             out.append({
                 "_id": str(d["_id"]),
