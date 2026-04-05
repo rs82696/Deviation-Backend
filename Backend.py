@@ -281,7 +281,9 @@ def list_all_incidents():
             #status = ""
             # IMPORTANT: use department-wise progress message
             #progress = build_progress_text(incident_id)
-            progress = ""
+            progress = "Pending"
+            next_step = "Pending"
+            
             out.append({
                 "_id": str(d["_id"]),
                 "incident_id": incident_id,
@@ -293,7 +295,7 @@ def list_all_incidents():
                 "created_by_department": created_by_department,
                 "assigned_to_department": assigned_to_department,
                 #"next_step": compute_next_step_for_incident(incident_id),
-                "next_step": " ",
+                "next_step": next_step,
             })
 
         return jsonify(out), 200
