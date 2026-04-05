@@ -277,11 +277,11 @@ def list_all_incidents():
 
             assigned_to_department = ", ".join(assigned_departments) if assigned_departments else ""
 
-            #status = d.get("status", "created")
-
+            status = d.get("status", "created")
+            #status = ""
             # IMPORTANT: use department-wise progress message
             #progress = build_progress_text(incident_id)
-
+            progress = ""
             out.append({
                 "_id": str(d["_id"]),
                 "incident_id": incident_id,
@@ -292,7 +292,8 @@ def list_all_incidents():
                 "updated_at": d.get("updated_at"),
                 "created_by_department": created_by_department,
                 "assigned_to_department": assigned_to_department,
-                "next_step": compute_next_step_for_incident(incident_id),
+                #"next_step": compute_next_step_for_incident(incident_id),
+                "next_step": " ",
             })
 
         return jsonify(out), 200
