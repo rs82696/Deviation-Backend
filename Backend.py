@@ -43,6 +43,7 @@ capa_collection = db["CAPA"]
 evaluation_collection = db["EvaluationComments"]
 qa_collection = db["QAComments"]
 users_collection = db["Users"]
+assigned_to_my_dept_collection = db["AssignedToMyDept"]
 
 # ✅ NEW: Single source of truth for incident header + status
 incidents_collection = db["Incidents"]
@@ -303,6 +304,7 @@ def list_all_incidents():
     except Exception as e:
         return jsonify({"message": f"Error listing incidents: {e}"}), 500
 """
+
 @app.route("/api/incidents", methods=["GET"])
 def list_all_incidents():
     try:
@@ -324,58 +326,36 @@ def list_all_incidents():
 
         incident_ids = [d.get("incident_id") for d in docs]
 
-        # ✅ Step 2: Bulk fetch related collections
-    
+        # ✅ Step 2: Bulk fetch department assignments
         dept_all = list(
-        department_selection_collection.find(
+            department_selection_collection.find(
                 {"incident_id": {"$in": incident_ids}}
             )
         )
 
-        general_all = list(general_info_collection.find({"incident_id": {"$in": incident_ids}}))
-        deviation_all = list(deviation_info_collection.find({"incident_id": {"$in": incident_ids}}))
-
-        prelim_all = list(
-            preliminary_collection.find(
-                {"incident_id": {"$in": incident_ids}}
-            )
-        )
-
-        rca_all = list(
-            rca_collection.find(
-                {"incident_id": {"$in": incident_ids}}
-            )
-        )
-
-        capa_all = list(
-            capa_collection.find(
-                {"incident_id": {"$in": incident_ids}}
-            )
-        )
-
-        qa_all = list(
-            qa_collection.find(
-                {"incident_id": {"$in": incident_ids}}
-            )
-        )
-        evaluation_all = list(evaluation_collection.find({"incident_id": {"$in": incident_ids}}))
-
-        # ✅ Step 3: Build maps (O(1) lookup)
         dept_map = {}
         for d in dept_all:
             iid = d.get("incident_id")
             dept_map.setdefault(iid, []).append(d)
-        general_map = {d["incident_id"]: d for d in general_all}
-        deviation_map = {d["incident_id"]: d for d in deviation_all}
-        prelim_map = {d["incident_id"]: d for d in prelim_all}
-        rca_map = {d["incident_id"]: d for d in rca_all}
-        capa_map = {d["incident_id"]: d for d in capa_all}
-        evaluation_map = {d["incident_id"]: d for d in evaluation_all}
-        qa_map = {d["incident_id"]: d for d in qa_all}
+
+        # ✅ Step 3: Bulk fetch assigned decisions (YOUR SOURCE OF TRUTH)
+        assigned_all = list(
+            assigned_to_my_dept_collection.find(
+                {"incident_id": {"$in": incident_ids}}
+            )
+        )
+
+        assigned_map = {}
+        for d in assigned_all:
+            iid = d.get("incident_id")
+            dept = d.get("department")
+            status = (d.get("status") or "").lower()
+
+            assigned_map.setdefault(iid, {})[dept] = status
 
         out = []
 
-        # ✅ Step 4: Build response (NO DB calls inside loop)
+        # ✅ Step 4: Build response
         for d in docs:
             incident_id = d.get("incident_id")
 
@@ -392,40 +372,36 @@ def list_all_incidents():
 
             assigned_to_department = ", ".join(assigned_departments) if assigned_departments else ""
 
-            status = d.get("status", "created")
+            status = (d.get("status") or "created").lower()
 
-            # ✅ Step 5: FAST progress + next_step logic (no DB calls)
-            if incident_id in qa_map:
-                    progress = "Completed"
-                    next_step = "Done"
+            # ✅ Step 5: Build department-wise progress
+            dept_status = assigned_map.get(incident_id, {})
 
-            elif incident_id in evaluation_map:
-                progress = "Evaluation Completed"
-                next_step = "QA Review"
+            progress_parts = []
 
-            elif incident_id in capa_map:
-                progress = "CAPA Completed"
-                next_step = "Evaluation Comments"
+            for dept in assigned_departments:
+                dept_status_val = dept_status.get(dept)
 
-            elif incident_id in rca_map:
-                progress = "RCA Completed"
-                next_step = "CAPA"
+                if dept_status_val == "approved":
+                    progress_parts.append(f"Approved by {dept}")
+                elif dept_status_val == "rejected":
+                    progress_parts.append(f"Rejected by {dept}")
+                elif dept_status_val == "review":
+                    progress_parts.append(f"Under Review by {dept}")
+                else:
+                    progress_parts.append(f"Pending by {dept}")
 
-            elif incident_id in prelim_map:
-                progress = "Under Investigation"
-                next_step = "RCA"
+            progress = " | ".join(progress_parts) if progress_parts else "Created"
 
-            elif incident_id in deviation_map:
-                progress = "Deviation Recorded"
-                next_step = "Preliminary Investigation"
-
-            elif incident_id in general_map:
-                progress = "General Info Submitted"
-                next_step = "Deviation Entry"
-
+            # ✅ Step 6: Next step logic
+            if "pending" in progress.lower():
+                next_step = "Pending Department Action"
+            elif "rejected" in progress.lower():
+                next_step = "Rework Required"
+            elif "approved" in progress.lower():
+                next_step = "Proceed to Next Stage"
             else:
-                progress = "Created"
-                next_step = "General Information"
+                next_step = "Start Workflow"
 
             out.append({
                 "_id": str(d["_id"]),
