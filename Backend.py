@@ -308,7 +308,11 @@ def list_all_incidents():
 @app.route("/api/incidents", methods=["GET"])
 def list_all_incidents():
     try:
-        # ✅ Step 1: Fetch latest 10 incidents (lightweight)
+        # ✅ Normalize helper
+        def normalize_dept(dept):
+            return (dept or "").strip().lower()
+
+        # ✅ Step 1: Fetch latest 10 incidents
         docs = list(
             incidents_collection.find(
                 {},
@@ -326,7 +330,7 @@ def list_all_incidents():
 
         incident_ids = [d.get("incident_id") for d in docs]
 
-        # ✅ Step 2: Bulk fetch department assignments
+        # ✅ Step 2: Department assignments
         dept_all = list(
             department_selection_collection.find(
                 {"incident_id": {"$in": incident_ids}}
@@ -338,7 +342,7 @@ def list_all_incidents():
             iid = d.get("incident_id")
             dept_map.setdefault(iid, []).append(d)
 
-        # ✅ Step 3: Bulk fetch assigned decisions (YOUR SOURCE OF TRUTH)
+        # ✅ Step 3: Assigned decisions (latest per dept)
         assigned_all = list(
             assigned_to_my_dept_collection.find(
                 {"incident_id": {"$in": incident_ids}}
@@ -346,12 +350,25 @@ def list_all_incidents():
         )
 
         assigned_map = {}
+
         for d in assigned_all:
             iid = d.get("incident_id")
-            dept = d.get("department")
-            status = (d.get("status") or "").lower()
+            dept = normalize_dept(d.get("department"))
+            status = (d.get("status") or "").strip().lower()
+            updated_at = d.get("updated_at") or d.get("created_at")
 
-            assigned_map.setdefault(iid, {})[dept] = status
+            if iid not in assigned_map:
+                assigned_map[iid] = {}
+
+            # keep latest decision
+            if (
+                dept not in assigned_map[iid] or
+                updated_at > assigned_map[iid][dept]["updated_at"]
+            ):
+                assigned_map[iid][dept] = {
+                    "status": status,
+                    "updated_at": updated_at
+                }
 
         out = []
 
@@ -366,39 +383,43 @@ def list_all_incidents():
 
             if dept_docs:
                 created_by_department = dept_docs[0].get("selectedDept", "") or ""
+
                 assigned_departments = sorted(list({
-                    x.get("department") for x in dept_docs if x.get("department")
+                    normalize_dept(x.get("department"))
+                    for x in dept_docs if x.get("department")
                 }))
 
-            assigned_to_department = ", ".join(assigned_departments) if assigned_departments else ""
+            assigned_to_department = ", ".join([
+                dept.title() for dept in assigned_departments
+            ]) if assigned_departments else ""
 
-            status = (d.get("status") or "created").lower()
-
-            # ✅ Step 5: Build department-wise progress
+            # ✅ Step 5: Build correct progress
             dept_status = assigned_map.get(incident_id, {})
 
             progress_parts = []
 
             for dept in assigned_departments:
-                dept_status_val = dept_status.get(dept)
+                dept_status_val = dept_status.get(dept, {}).get("status")
 
                 if dept_status_val == "approved":
-                    progress_parts.append(f"Approved by {dept}")
+                    progress_parts.append(f"Approved by {dept.title()}")
                 elif dept_status_val == "rejected":
-                    progress_parts.append(f"Rejected by {dept}")
+                    progress_parts.append(f"Rejected by {dept.title()}")
                 elif dept_status_val == "review":
-                    progress_parts.append(f"Under Review by {dept}")
+                    progress_parts.append(f"Under Review by {dept.title()}")
                 else:
-                    progress_parts.append(f"Pending by {dept}")
+                    progress_parts.append(f"Pending by {dept.title()}")
 
             progress = " | ".join(progress_parts) if progress_parts else "Created"
 
             # ✅ Step 6: Next step logic
-            if "pending" in progress.lower():
+            progress_lower = progress.lower()
+
+            if "pending" in progress_lower:
                 next_step = "Pending Department Action"
-            elif "rejected" in progress.lower():
+            elif "rejected" in progress_lower:
                 next_step = "Rework Required"
-            elif "approved" in progress.lower():
+            elif "approved" in progress_lower:
                 next_step = "Proceed to Next Stage"
             else:
                 next_step = "Start Workflow"
@@ -407,7 +428,7 @@ def list_all_incidents():
                 "_id": str(d["_id"]),
                 "incident_id": incident_id,
                 "title": d.get("title", ""),
-                "status": status,
+                "status": d.get("status", "created"),
                 "progress": progress,
                 "created_at": d.get("created_at"),
                 "updated_at": d.get("updated_at"),
