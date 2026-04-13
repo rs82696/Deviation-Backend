@@ -1206,13 +1206,10 @@ def get_assigned_to_my_department(dept):
             }
         }))
 
-        print("🔵 assigned_docs:", assigned_docs)
-
         # ✅ STEP 2: loop through incidents
         for doc in assigned_docs:
             incident_id = (doc.get("incident_id") or "").strip()
 
-            print("🔴 checking incident:", incident_id)
 
             # ✅ STEP 3: get department decision
             decision = assigned_to_my_dept_collection.find_one({
@@ -1223,14 +1220,10 @@ def get_assigned_to_my_department(dept):
                 }
             })
 
-            print("🟢 decision found:", decision)
-
             # ✅ STEP 4: get full incident details
             incident = incidents_collection.find_one({
                 "incident_id": incident_id
             })
-
-            print("🟡 incident found:", incident)
 
             # ✅ SAFE FIELD MAPPING (handles all naming variations)
             title = None
