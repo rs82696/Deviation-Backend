@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 // ✅ USE DEPLOYED BACKEND
-//const API_BASE = "http://127.0.0.1:5000";
-const API_BASE = "https://deviation-backend-z706.onrender.com";
+const API_BASE = "http://127.0.0.1:5000";
+//const API_BASE = "https://deviation-backend-z706.onrender.com";
 
 export default function AssignedToDepartment() {
   const [rows, setRows] = useState([]);
@@ -24,7 +24,7 @@ export default function AssignedToDepartment() {
     setError("");
     try {
       const res = await fetch(
-          `${API_BASE}/api/assigned-to-department?department=${encodeURIComponent(department)}`
+         `${API_BASE}/api/incidents/assigned-to-department/${encodeURIComponent(department)}`
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();

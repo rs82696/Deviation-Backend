@@ -324,179 +324,6 @@ def department_decision(incident_id):
         print("ERROR:", e)
         return jsonify({"error": str(e)}), 500
     
-"""
-@app.route("/api/incidents", methods=["GET"])
-def list_all_incidents():
-    try:
-        #docs = list(incidents_collection.find({}).sort("created_at", -1))
-        docs = list(
-            incidents_collection.find(
-                {},
-                {
-                    "incident_id": 1,
-                    "title": 1,
-                    "status": 1,
-                    "created_at": 1,
-                    "updated_at": 1
-                }
-            )
-            .sort("created_at", -1)
-            .limit(10)
-        )
-
-          # ✅ Step 2: Get all incident_ids
-        incident_ids = [d.get("incident_id") for d in docs]
-
-        # ✅ Step 3: Bulk fetch department data (avoid N+1 queries)
-        dept_all = list(
-            department_selection_collection.find(
-                {"incident_id": {"$in": incident_ids}}
-            )
-        )
-
-        # ✅ Step 4: Group department data by incident_id
-        dept_map = {}
-        for d in dept_all:
-            iid = d.get("incident_id")
-            dept_map.setdefault(iid, []).append(d)
-        out = []
-
-        for d in docs:
-            incident_id = d.get("incident_id")
-
-            #dept_docs = list(department_selection_collection.find({"incident_id": incident_id}))
-
-            dept_docs = dept_map.get(incident_id, [])
-
-            created_by_department = ""
-            assigned_departments = []
-
-            if dept_docs:
-                created_by_department = dept_docs[0].get("selectedDept", "") or ""
-                assigned_departments = sorted(list({
-                    x.get("department") for x in dept_docs if x.get("department")
-                }))
-
-            assigned_to_department = ", ".join(assigned_departments) if assigned_departments else ""
-
-            status = d.get("status", "created")
-            #status = ""
-            # IMPORTANT: use department-wise progress message
-            progress = build_progress_text(incident_id)
-            #progress = "Pending"
-            next_step = "Pending"
-
-            out.append({
-                "_id": str(d["_id"]),
-                "incident_id": incident_id,
-                "title": d.get("title", ""),
-                "status": status,
-                "progress": progress,
-                "created_at": d.get("created_at"),
-                "updated_at": d.get("updated_at"),
-                "created_by_department": created_by_department,
-                "assigned_to_department": assigned_to_department,
-                "next_step": compute_next_step_for_incident(incident_id),
-                #"next_step": next_step,
-            })
-
-        return jsonify(out), 200
-
-    except Exception as e:
-        return jsonify({"message": f"Error listing incidents: {e}"}), 500
-"""
-"""
-# ================================
-# ✅ Step 4: Build response
-# ================================
-out = []
-
-for d in docs:
-    incident_id = d.get("incident_id")
-
-    dept_docs = dept_map.get(incident_id, [])
-
-    created_by_department = ""
-    assigned_departments = []
-
-    if dept_docs:
-        created_by_department = dept_docs[0].get("selectedDept", "") or ""
-
-        assigned_departments = sorted(list({
-            normalize_dept(x.get("department"))
-            for x in dept_docs if x.get("department")
-        }))
-
-    assigned_to_department = ", ".join([
-        dept.title() for dept in assigned_departments
-    ]) if assigned_departments else ""
-
-    # ================================
-    # ✅ NEW FINAL STATUS LOGIC
-    # ================================
-    dept_status = assigned_map.get(incident_id, {})
-
-    statuses = []
-    for dept in assigned_departments:
-        statuses.append(dept_status.get(dept, "pending"))
-
-    # 🔥 APPLY RULES
-    if statuses and all(s == "approved" for s in statuses):
-        overall_status = "approved"
-        progress = "Approved by all"
-
-    elif statuses and all(s == "rejected" for s in statuses):
-        overall_status = "rejected"
-        progress = "Rejected by all"
-
-    elif "rejected" in statuses:
-        overall_status = "action_required"
-
-        parts = []
-        for dept in assigned_departments:
-            s = dept_status.get(dept, "pending")
-            if s == "approved":
-                parts.append(f"Approved by {dept.title()}")
-            elif s == "rejected":
-                parts.append(f"Rejected by {dept.title()}")
-
-        progress = " | ".join(parts)
-
-    else:
-        overall_status = "pending"
-
-        parts = []
-        for dept in assigned_departments:
-            s = dept_status.get(dept, "pending")
-            parts.append(f"{s.capitalize()} by {dept.title()}")
-
-        progress = " | ".join(parts)
-
-    # ================================
-    # ✅ NEXT STEP LOGIC (updated)
-    # ================================
-    if overall_status == "approved":
-        next_step = "Completed"
-    elif overall_status == "rejected":
-        next_step = "Closed"
-    elif overall_status == "action_required":
-        next_step = "Pending Department Action"
-    else:
-        next_step = "In Progress"
-
-    out.append({
-        "_id": str(d["_id"]),
-        "incident_id": incident_id,
-        "title": d.get("title", ""),
-        "status": overall_status,   # ✅ IMPORTANT CHANGE
-        "progress": progress,
-        "created_at": d.get("created_at"),
-        "updated_at": d.get("updated_at"),
-        "created_by_department": created_by_department,
-        "assigned_to_department": assigned_to_department,
-        "next_step": next_step,
-    })
-"""
 @app.route("/api/incidents", methods=["GET"])
 def list_all_incidents():
     try:
@@ -1193,68 +1020,60 @@ from flask import jsonify
 @app.route("/api/incidents/assigned-to-department/<dept>", methods=["GET"])
 def get_assigned_to_my_department(dept):
     try:
-        # ✅ normalize department
-        dept = dept.strip().lower()
+        # ✅ normalize input
+        dept = (dept or "").strip().lower()
 
         results = []
 
-        # ✅ STEP 1: get assigned incidents
+        # ✅ STEP 1: fetch assigned documents (SAFE REGEX)
         assigned_docs = list(department_selection_collection.find({
-            "incident_id": incident_id,
             "department": {
                 "$regex": dept,
                 "$options": "i"
             }
         }))
 
-        # ✅ STEP 2: loop through incidents
+        #print("DEBUG → DEPT:", dept)
+        #print("DEBUG → ASSIGNED_DOCS COUNT:", len(assigned_docs))
+
+        # ✅ STEP 2: loop through assigned incidents
         for doc in assigned_docs:
             incident_id = (doc.get("incident_id") or "").strip()
 
+            if not incident_id:
+                continue
 
-            # ✅ STEP 3: get department decision
+            # ✅ STEP 3: fetch decision (SAFE)
             decision = assigned_to_my_dept_collection.find_one({
                 "incident_id": incident_id,
                 "department": {
-                    "$regex": f"^{dept}$",
+                    "$regex": dept,
                     "$options": "i"
                 }
-            })
+            }) or {}
 
-            # ✅ STEP 4: get full incident details
+            # ✅ STEP 4: fetch incident details (SAFE)
             incident = incidents_collection.find_one({
                 "incident_id": incident_id
-            })
+            }) or {}
 
-            # ✅ SAFE FIELD MAPPING (handles all naming variations)
-            title = None
-            raised_by = None
-            created_at = None
+            #print("DEBUG → INCIDENT:", incident_id, "→", incident)
 
-            if incident:
-                title = (
+            # ✅ STEP 5: build response safely
+            results.append({
+                "incident_id": incident_id,
+                "title": (
                     incident.get("title") or
                     incident.get("description") or
                     incident.get("incident_title")
-                )
-
-                raised_by_department = (
-                    incident.get("selectedDept")
-                )
-
-                created_at = (
+                ),
+                "raised_by_department": incident.get("selectedDept"),
+                "created_at": (
                     incident.get("created_at") or
                     incident.get("createdAt")
-                )
-
-            # ✅ FINAL RESPONSE OBJECT
-            results.append({
-                "incident_id": incident_id,
-                "title": incident.get("title"),
-                "raised_by_department": incident.get("selectedDept"),  # ✅ FIXED
-                "created_at": incident.get("created_at"),
-                "status": decision["status"] if decision else "pending",
-                "decision_by": decision.get("decision_by") if decision else None
+                ),
+                "status": decision.get("status", "pending"),
+                "decision_by": decision.get("decision_by")
             })
 
         return jsonify(results), 200
