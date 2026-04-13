@@ -26,8 +26,8 @@ if not S3_BUCKET:
     raise RuntimeError("S3_BUCKET_NAME environment variable is required")
 s3 = boto3.client("s3", region_name=AWS_REGION)
 
-MONGO_URI = "mongodb+srv://monikars82696_db_user:Monika123@cluster01.nslata7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster01"
-#MONGO_URI = os.getenv("MONGO_URI")
+#MONGO_URI = "mongodb+srv://monikars82696_db_user:Monika123@cluster01.nslata7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster01"
+MONGO_URI = os.getenv("MONGO_URI")
 DATABASE_NAME = "testdb1"
 
 client = MongoClient(MONGO_URI)
