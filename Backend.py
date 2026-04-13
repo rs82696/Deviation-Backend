@@ -1200,8 +1200,9 @@ def get_assigned_to_my_department(dept):
 
         # ✅ STEP 1: get assigned incidents
         assigned_docs = list(department_selection_collection.find({
+            "incident_id": incident_id,
             "department": {
-                "$regex": f"^{dept}$",
+                "$regex": dept,
                 "$options": "i"
             }
         }))
