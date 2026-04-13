@@ -3,8 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
-//const API_BASE = "http://127.0.0.1:5000";
-const API_BASE ="https://deviation-backend-z706.onrender.com";
+const API_BASE = "http://127.0.0.1:5000";
+//const API_BASE ="https://deviation-backend-z706.onrender.com";
 
 
 export default function ViewIncidents() {
@@ -176,8 +176,11 @@ export default function ViewIncidents() {
                       <td style={td}>
                         <span style={pill(row.status)}>{row.status || "—"}</span>
                       </td>
-
-                      <td style={td}>{row.progress || "—"}</td>
+                      <td>
+                        <span style={pill(row.status)}>
+                          {row.progress || "—"}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

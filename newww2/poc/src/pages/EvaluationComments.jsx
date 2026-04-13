@@ -3,8 +3,8 @@ import "./QAComments.css";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 
-//const API_BASE = "http://127.0.0.1:5000";
-const API_BASE ="https://deviation-backend-z706.onrender.com";
+const API_BASE = "http://127.0.0.1:5000";
+//const API_BASE ="https://deviation-backend-z706.onrender.com";
 
 const departments = [
   "Quality Control",
@@ -21,14 +21,58 @@ export default function EvaluationComments() {
   const navigate = useNavigate();
   const incidentId = localStorage.getItem("incident_id") || "";
   const editorRefs = useRef({});
-
+  const [selectedDepts, setSelectedDepts] = useState([]);
   const [deptData, setDeptData] = useState(
     departments.reduce((acc, dept) => {
       acc[dept] = { comment_na: false };
       return acc;
     }, {})
   );
+  // FETCH SELECTED DEPARTMENTS
+  useEffect(() => {
+    if (!incidentId) return;
 
+    fetch(`${API_BASE}/api/incidents/${incidentId}/selected-departments`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("API RESPONSE:", data);
+
+        if (!Array.isArray(data)) {
+          console.error("Expected array but got:", data);
+          setSelectedDepts([]);
+          return;
+        }
+
+        const normalized = data.map((d) => (d || "").toLowerCase());
+        setSelectedDepts(normalized);
+      })
+      .catch((err) => console.error("Error fetching selected depts:", err));
+  }, [incidentId]);
+
+  //  CHECK IF ENABLED
+  const DEPT_MAP = {
+  "qualitycontrol": "qc",
+  "qc": "qc",
+  "warehouse": "warehouse",
+  "productionorals": "production",
+  "production": "production",
+  "microbiology": "microbiology",
+  "regulatoryaffairs": "regulatory",
+  "personnelandadministration": "hr",
+  "customer": "customer",
+  };
+  //const normalize = (str) => (str || "").toLowerCase().replace(/\s+/g, "");
+  const normalize = (str) => {
+  const key = (str || "").toLowerCase().replace(/\s+/g, "");
+  return DEPT_MAP[key] || key;
+  };
+  const isEnabled = (dept) => {
+  return selectedDepts.some(
+    (d) => normalize(d) === normalize(dept)
+    );
+  };
+  //console.log("Selected:", selectedDepts);
+  //console.log("Dept:", dept, "Enabled:", isEnabled(dept));
   const execFormat = (dept, cmd) => {
     const el = editorRefs.current[dept];
     if (!el) return;
@@ -148,43 +192,57 @@ export default function EvaluationComments() {
           </div>
         )}
 
-        {departments.map((dept) => (
-          <section className="capa-section" key={dept}>
-            <div className="capa-section-header">
-              <h3>{dept} Comments:</h3>
-              <div className="capa-na">
-                <input
-                  type="checkbox"
-                  checked={deptData[dept].comment_na}
-                  disabled={viewOnly}
-                  onChange={(e) =>
-                    setDeptData((prev) => ({
-                      ...prev,
-                      [dept]: {
-                        ...prev[dept],
-                        comment_na: e.target.checked,
-                      },
-                    }))
-                  }
-                />
-                <label>NOT APPLICABLE</label>
-              </div>
-            </div>
+        {departments.map((dept) => {
+          const enabled = isEnabled(dept);
 
-            <div className={`capa-editor ${(viewOnly || deptData[dept].comment_na) ? "disabled" : ""}`}>
-              <Toolbar dept={dept} />
+          return (
+            <section className="capa-section" key={dept}>
+              <div className="capa-section-header">
+                <h3>{dept} Comments:</h3>
+
+                <div className="capa-na">
+                  <input
+                    type="checkbox"
+                    checked={deptData[dept].comment_na}
+                    disabled={!enabled || viewOnly}
+                    onChange={(e) =>
+                      setDeptData((prev) => ({
+                        ...prev,
+                        [dept]: {
+                          ...prev[dept],
+                          comment_na: e.target.checked,
+                        },
+                      }))
+                    }
+                  />
+                  <label>NOT APPLICABLE</label>
+                </div>
+              </div>
+
+              <div className="capa-editor">
+              {enabled && <Toolbar dept={dept} />}
+
               <div
-                ref={(el) => {
-                  editorRefs.current[dept] = el;
-                }}
-                className="capa-editor-body"
-                contentEditable={!viewOnly && !deptData[dept].comment_na}
-                suppressContentEditableWarning={true}
-                data-placeholder={`Enter ${dept} comments...`}
-              ></div>
+              ref={(el) => {
+                editorRefs.current[dept] = el;
+              }}
+              className="capa-editor-body"
+              contentEditable={enabled && !viewOnly && !deptData[dept].comment_na}
+              suppressContentEditableWarning={true}
+              data-placeholder={`Enter ${dept} comments...`}
+              style={{
+                backgroundColor: enabled ? "#fff" : "#f3f4f6",
+                cursor: enabled ? "text" : "not-allowed",
+
+                // 🔥 ADD THESE (CRITICAL)
+                pointerEvents: enabled ? "auto" : "none",
+                userSelect: "text",
+              }}
+            ></div>
             </div>
-          </section>
-        ))}
+            </section>
+          );
+        })}
 
         <div className="capa-buttons">
           <button

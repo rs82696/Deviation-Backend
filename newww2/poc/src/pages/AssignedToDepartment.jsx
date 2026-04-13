@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
-//const API_BASE = "http://127.0.0.1:5000";
-const API_BASE ="https://deviation-backend-z706.onrender.com";
+// ✅ USE DEPLOYED BACKEND
+const API_BASE = "http://127.0.0.1:5000";
+//const API_BASE = "https://deviation-backend-z706.onrender.com";
 
 export default function AssignedToDepartment() {
   const [rows, setRows] = useState([]);
@@ -15,6 +16,9 @@ export default function AssignedToDepartment() {
   const department = localStorage.getItem("department") || "";
   const username = localStorage.getItem("username") || "";
 
+  // ================================
+  // ✅ LOAD DATA
+  // ================================
   const load = async () => {
     setLoading(true);
     setError("");
@@ -37,6 +41,9 @@ export default function AssignedToDepartment() {
     load();
   }, [department]);
 
+  // ================================
+  // ✅ SEARCH FILTER
+  // ================================
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return rows;
@@ -49,22 +56,31 @@ export default function AssignedToDepartment() {
       );
     });
   }, [rows, q]);
-  
+
+  // ================================
+  // ✅ OPEN INCIDENT
+  // ================================
   const openIncident = (row) => {
     localStorage.setItem("incident_id", row.incident_id);
     localStorage.setItem("view_only", "true");
     navigate(row.next_step || "/general-info");
   };
-  const handleReview = async (row) => {
+
+  // ================================
+  // ✅ COMMON API FUNCTION
+  // ================================
+  const sendDecision = async (incidentId, statusValue) => {
     try {
       const res = await fetch(
-        `${API_BASE}/api/incidents/${row.incident_id}/department-decision`,
+        `${API_BASE}/api/incidents/${incidentId}/department-decision`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             department,
-            decision_status: "under_review",
+            status: statusValue,   // ✅ FIXED FIELD
             decision_by: username,
           }),
         }
@@ -72,73 +88,45 @@ export default function AssignedToDepartment() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      localStorage.setItem("incident_id", row.incident_id);
-      localStorage.removeItem("view_only");
-      navigate(row.next_step || "/general-info");
-    } catch (e) {
-      console.error(e);
-      alert("Failed to mark incident under review.");
+      await load(); // refresh table
+    } catch (error) {
+      console.error("Error saving decision:", error);
+      alert("Failed to save decision.");
     }
+  };
+
+  // ================================
+  // ✅ ACTION HANDLERS
+  // ================================
+  const handleReview = async (row) => {
+    await sendDecision(row.incident_id, "under_review");
+
+    localStorage.setItem("incident_id", row.incident_id);
+    localStorage.removeItem("view_only");
+    navigate(row.next_step || "/general-info");
   };
 
   const handleApprove = async (row) => {
-    try {
-      const confirmApprove = window.confirm(
-        "Are you sure you want to APPROVE this incident?"
-      );
-      if (!confirmApprove) return;
+    const confirmApprove = window.confirm(
+      "Are you sure you want to APPROVE this incident?"
+    );
+    if (!confirmApprove) return;
 
-      const res = await fetch(
-        `${API_BASE}/api/incidents/${row.incident_id}/department-decision`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            department,
-            decision_status: "approved",
-            decision_by: username,
-          }),
-        }
-      );
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      await load();
-    } catch (e) {
-      console.error(e);
-      alert("Failed to approve incident.");
-    }
+    await sendDecision(row.incident_id, "approved");
   };
 
   const handleReject = async (row) => {
-    try {
-      const confirmReject = window.confirm(
-        "Are you sure you want to REJECT this incident?"
-      );
-      if (!confirmReject) return;
+    const confirmReject = window.confirm(
+      "Are you sure you want to REJECT this incident?"
+    );
+    if (!confirmReject) return;
 
-      const res = await fetch(
-        `${API_BASE}/api/incidents/${row.incident_id}/department-decision`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            department,
-            decision_status: "rejected",
-            decision_by: username,
-          }),
-        }
-      );
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      await load();
-    } catch (e) {
-      console.error(e);
-      alert("Failed to reject incident.");
-    }
+    await sendDecision(row.incident_id, "rejected");
   };
 
+  // ================================
+  // ✅ UI STYLES
+  // ================================
   const th = {
     padding: "12px 14px",
     textAlign: "left",
@@ -184,31 +172,26 @@ export default function AssignedToDepartment() {
     return { ...base, background: "#e5e7eb", color: "#374151" };
   };
 
+  // ================================
+  // ✅ UI
+  // ================================
   return (
     <>
       <Navbar disableTabs={true} />
 
       <div style={{ maxWidth: 1200, margin: "26px auto", padding: "0 16px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
           <h2 style={{ margin: 0 }}>Incidents Assigned to My Department</h2>
 
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by Incident ID / Title / Created By / My Decision"
+            placeholder="Search..."
             style={{
               width: 440,
               padding: "10px 12px",
               borderRadius: 10,
               border: "1px solid #d1d5db",
-              outline: "none",
             }}
           />
         </div>
@@ -219,87 +202,47 @@ export default function AssignedToDepartment() {
           {!loading && !filtered.length && !error && <p>No incidents found.</p>}
 
           {!!filtered.length && (
-            <div
-              style={{
-                marginTop: 14,
-                borderRadius: 12,
-                overflow: "hidden",
-                boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-              }}
-            >
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={th}>Incident ID</th>
-                    <th style={th}>Title</th>
-                    <th style={th}>Created By</th>
-                    <th style={th}>Created</th>
-                    <th style={th}>My Decision</th>
-                    <th style={th}>Actions</th>
+            <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 14 }}>
+              <thead>
+                <tr>
+                  <th style={th}>Incident ID</th>
+                  <th style={th}>Title</th>
+                  <th style={th}>Created By</th>
+                  <th style={th}>Created</th>
+                  <th style={th}>My Decision</th>
+                  <th style={th}>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filtered.map((row) => (
+                  <tr key={row.incident_id}>
+                    <td style={td}>
+                      <span onClick={() => openIncident(row)} style={{ color: "#2563eb", cursor: "pointer", textDecoration: "underline" }}>
+                        {row.incident_id}
+                      </span>
+                    </td>
+                    <td style={td}>{row.title || "—"}</td>
+                    <td style={td}>{row.created_by || row.raised_by_department|| "—"}</td>
+                    <td style={td}>
+                      {row.created_at ? new Date(row.created_at).toLocaleString() : "—"}
+                    </td>
+                    <td style={td}>
+                      <span style={pill(row.status)}>
+                        {row.status || "Pending"}
+                      </span>
+                    </td>
+                    <td style={td}>
+                      <button style={{ ...btn, background: "#2563eb" }} onClick={() => handleReview(row)}>Review</button>
+                      <button style={{ ...btn, background: "#16a34a" }} onClick={() => handleApprove(row)}>Approve</button>
+                      <button style={{ ...btn, background: "#dc2626" }} onClick={() => handleReject(row)}>Reject</button>
+                    </td>
                   </tr>
-                </thead>
-
-                <tbody>
-                  {filtered.map((row) => (
-                    <tr key={row.incident_id}>
-                      <td style={td}>
-                      <span
-                          onClick={() => openIncident(row)}
-                          style={{
-                            color: "#2563eb",
-                            cursor: "pointer",
-                            fontWeight: 600,
-                            textDecoration: "underline",
-                          }}
-                          title="Open incident in view-only mode"
-                        >
-                          {row.incident_id}
-                        </span>
-                      </td>
-                      <td style={td}>{row.title || "—"}</td>
-                      <td style={td}>{row.raised_by_department || "—"}</td>
-                      <td style={td}>
-                        {row.created_at ? new Date(row.created_at).toLocaleString() : "—"}
-                      </td>
-
-                      <td style={td}>
-                        <span style={pill(row.department_decision_status)}>
-                          {row.department_decision_status || "—"}
-                        </span>
-                      </td>
-
-                      <td style={td}>
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                          <button
-                            style={{ ...btn, background: "#2563eb" }}
-                            onClick={() => handleReview(row)}
-                          >
-                            Review
-                          </button>
-
-                          <button
-                            style={{ ...btn, background: "#16a34a" }}
-                            onClick={() => handleApprove(row)}
-                          >
-                            Approve
-                          </button>
-
-                          <button
-                            style={{ ...btn, background: "#dc2626" }}
-                            onClick={() => handleReject(row)}
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           )}
-
-          <div style={{ marginTop: 16 }}>
+                    <div style={{ marginTop: 16 }}>
             <button
               onClick={() => navigate("/dashboard")}
               style={{
@@ -319,5 +262,6 @@ export default function AssignedToDepartment() {
         </div>
       </div>
     </>
+    
   );
 }
