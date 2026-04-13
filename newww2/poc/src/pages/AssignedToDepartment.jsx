@@ -24,7 +24,7 @@ export default function AssignedToDepartment() {
     setError("");
     try {
       const res = await fetch(
-          `${API_BASE}/api/assigned-to-my-department?department=${encodeURIComponent(department)}`
+          `${API_BASE}/api/assigned-to-department?department=${encodeURIComponent(department)}`
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
