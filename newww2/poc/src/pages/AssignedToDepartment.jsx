@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 // ✅ USE DEPLOYED BACKEND
-const API_BASE = "http://127.0.0.1:5000";
-//const API_BASE = "https://deviation-backend-z706.onrender.com";
+//const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = "https://deviation-backend-z706.onrender.com";
 
 export default function AssignedToDepartment() {
   const [rows, setRows] = useState([]);
