@@ -574,7 +574,7 @@ def list_pending_incidents_by_department(department):
         return jsonify({"message": f"Error fetching pending incidents by department: {e}"}), 500
 
 
-
+"""
 #@app.route("/api/incidents/rejected", methods=["GET"])
 @app.route("/api/incidents/rejected-by-department/<department>", methods=["GET"])
 def list_rejected_incidents_by_department(department):
@@ -696,7 +696,85 @@ def list_action_required_incidents_by_department(department):
 
     except Exception as e:
         return jsonify({"message": f"Error fetching action required incidents by department: {e}"}), 500
-           
+"""
+@app.route("/api/incidents/rejected-by-department/<department>", methods=["GET"])
+def list_rejected_incidents_by_department(department):
+    try:
+        department = (department or "").strip().lower()
+
+        dept_docs = list(
+            department_selection_collection.find({
+                "$or": [
+                    {"selectedDept": {"$regex": department, "$options": "i"}},
+                    {"department": {"$regex": department, "$options": "i"}}
+                ]
+            })
+        )
+
+        incident_ids = list(set(d.get("incident_id") for d in dept_docs if d.get("incident_id")))
+
+        out = []
+
+        for incident_id in incident_ids:
+
+            # 🔥 STEP 1 — get all assigned departments
+            assigned_docs = list(department_selection_collection.find({
+                "incident_id": incident_id
+            }))
+
+            assigned_departments = [d.get("department") for d in assigned_docs if d.get("department")]
+
+            # 🔥 STEP 2 — get all decisions
+            decisions = list(assigned_to_my_dept_collection.find({
+                "incident_id": incident_id
+            }))
+
+            decision_map = {d["department"].lower(): d["status"] for d in decisions}
+
+            # 🔥 STEP 3 — compute final status
+            statuses = []
+
+            for dept in assigned_departments:
+                status = decision_map.get(dept.lower(), "pending")
+                statuses.append(status)
+
+            if all(s == "approved" for s in statuses):
+                final_status = "approved"
+            elif all(s == "rejected" for s in statuses):
+                final_status = "rejected"
+            elif any(s == "rejected" for s in statuses):
+                final_status = "action_required"
+            else:
+                final_status = "pending"
+
+            # ❗ ONLY show rejected / action_required in this API
+            if final_status not in ["rejected", "action_required"]:
+                continue
+
+            # 🔥 STEP 4 — get incident info
+            incident = incidents_collection.find_one({
+                "incident_id": incident_id
+            }) or {}
+
+            # 🔥 STEP 5 — build response
+            out.append({
+                "incident_id": incident_id,
+                "title": incident.get("title"),
+                "status": final_status,
+                "created_at": incident.get("created_at"),
+                "updated_at": incident.get("updated_at"),
+                "created_by_department": incident.get("selectedDept"),
+                "assigned_to_department": ", ".join(assigned_departments),
+                "progress": " | ".join([
+                    f"{decision_map.get(dept.lower(), 'pending')} by {dept}"
+                    for dept in assigned_departments
+                ])
+            })
+
+        return jsonify(out), 200
+
+    except Exception as e:
+        return jsonify({"message": f"Error fetching rejected incidents: {e}"}), 500    
 
   
 
