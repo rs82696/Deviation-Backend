@@ -3,17 +3,18 @@ import "./QAComments.css";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 
-//const API_BASE = "http://127.0.0.1:5000";
-const API_BASE = "https://deviation-backend-z706.onrender.com";
+const API_BASE = "http://127.0.0.1:5000";
+//const API_BASE = "https://deviation-backend-z706.onrender.com";
 
 const departments = [
   "Quality Control",
   "Warehouse",
   "Regulatory Affairs",
-  "Production Orals",
+  "Production",
   "Microbiology",
   "Personnel and Administration",
-  "Customer",
+  "Engineering",
+  "Customer"
 ];
 
 export default function EvaluationComments() {
@@ -54,12 +55,12 @@ export default function EvaluationComments() {
   "qualitycontrol": "qc",
   "qc": "qc",
   "warehouse": "warehouse",
-  "productionorals": "production",
   "production": "production",
   "microbiology": "microbiology",
   "regulatoryaffairs": "regulatory",
   "personnelandadministration": "hr",
   "customer": "customer",
+  "Engineering": "Engineering"
   };
   //const normalize = (str) => (str || "").toLowerCase().replace(/\s+/g, "");
   const normalize = (str) => {

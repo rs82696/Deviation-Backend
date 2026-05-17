@@ -3,9 +3,10 @@ import React from "react";
 const Department = ({ selectedDept, setSelectedDept, selectedIncident, setSelectedIncident }) => {
   const departments = [
     "Customer",
+    "Engineering",
     "Microbiology",
     "Personnel and administration",
-    "Production Orals",
+    "Production",
     "Quality Assurance",
     "Quality Control",
     "Regulatory Affairs",

@@ -3,8 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
-//const API_BASE = "http://127.0.0.1:5000";
-const API_BASE = "https://deviation-backend-z706.onrender.com";
+const API_BASE = "http://127.0.0.1:5000";
+//const API_BASE = "https://deviation-backend-z706.onrender.com";
 
 export default function ViewIncidents() {
   const [rows, setRows] = useState([]);
@@ -49,10 +49,14 @@ export default function ViewIncidents() {
   }, [rows, q]);
 
   const openIncident = (row) => {
-    localStorage.setItem("incident_id", row.incident_id);
-    localStorage.setItem("view_only", "true");
-    navigate(row.next_step || "/general-info");
-  };
+  localStorage.setItem("incident_id", row.incident_id);
+  localStorage.setItem("view_only", "true");
+
+  console.log("Opening incident:", row.incident_id);
+  console.log("Next step from backend:", row.next_step);
+
+  navigate("/general-info");
+   };
 
   const th = {
     padding: "12px 14px",

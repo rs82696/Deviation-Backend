@@ -6,8 +6,8 @@
   background: #fff;
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #222;
 }
 
@@ -44,13 +44,15 @@
   border-radius: 8px;
   padding: 10px;
   background: #f8f9ff;
+  margin-top: 10px;
 }
 
 .pi-editor.disabled {
   opacity: 0.5;
+  pointer-events: none;
 }
 
-/* Toolbar styling EXACT like screenshot */
+/* Toolbar */
 .pi-toolbar {
   display: flex;
   gap: 8px;
@@ -73,6 +75,11 @@
   background: #edf0ff;
 }
 
+.pi-toolbar button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Editor Body */
 .pi-editor-body {
   min-height: 120px;
@@ -89,7 +96,67 @@
   font-style: italic;
 }
 
-/* BUTTONS Area */
+/* Attachments */
+.attach-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.attach-row input[type="file"] {
+  padding: 8px;
+  border: 1px solid #c5cde6;
+  border-radius: 8px;
+  background: #f8f9ff;
+  font-size: 14px;
+}
+
+.attach-row input[type="file"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.attach-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 8px;
+}
+
+.attach-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f8f9ff;
+  border: 1px solid #c5cde6;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.attach-item a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+.attach-del {
+  border: none;
+  background: transparent;
+  color: #dc2626;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.attach-del:hover {
+  color: #991b1b;
+}
+
+/* Buttons Area */
 .pi-buttons {
   display: flex;
   justify-content: flex-end;
@@ -109,30 +176,54 @@
   transition: all 0.2s ease;
 }
 
+.pi-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Individual button styles */
 .pi-btn.back {
-background: #e4e7eb;
-color: #333;
+  background: #e4e7eb;
+  color: #333;
 }
 
 .pi-btn.back:hover {
-background: #d0d4da;
+  background: #d0d4da;
 }
 
 .pi-btn.save {
-background: #34c759;
-color: #fff;
+  background: #34c759;
+  color: #fff;
 }
 
 .pi-btn.save:hover {
-background: #28a745;
+  background: #28a745;
 }
 
 .pi-btn.exit {
-background: #ffcc66;
-color: #5a3e00;
+  background: #ffcc66;
+  color: #5a3e00;
 }
 
 .pi-btn.exit:hover {
-background: #ffb84d;
+  background: #ffb84d;
+}
+
+/* Generic upload buttons inside attachment section */
+.pi-btn.upload {
+  background: #2563eb;
+  color: #fff;
+}
+
+.pi-btn.upload:hover {
+  background: #1d4ed8;
+}
+
+.pi-btn.clear {
+  background: #6c757d;
+  color: #fff;
+}
+
+.pi-btn.clear:hover {
+  background: #5c636a;
 }

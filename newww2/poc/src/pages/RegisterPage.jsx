@@ -3,8 +3,8 @@ import { useState } from "react";
 import "./LoginPage.css";
 import img from "../assets/LoginImage.jpg";
 
-//const API_BASE = "http://127.0.0.1:5000";
-const API_BASE = "https://deviation-backend-z706.onrender.com";
+const API_BASE = "http://127.0.0.1:5000";
+//const API_BASE = "https://deviation-backend-z706.onrender.com";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -75,10 +75,11 @@ const RegisterPage = () => {
       >
         <option value="">Select Department</option>
         <option value="Customer">Customer</option>
+        <option value="Engineering">Engineering</option>
         <option value="Quality Assurance">Quality Assurance</option>
         <option value="Warehouse">Warehouse</option>
         <option value="Regulatory Affairs">Regulatory Affairs</option>
-        <option value="Production Orals">Production Orals</option>
+        <option value="Production Orals">Production</option>
         <option value="Microbiology">Microbiology</option>
         <option value="Personnel and administration">Personnel and administration</option>
         <option value="Quality Control">Quality Control</option>

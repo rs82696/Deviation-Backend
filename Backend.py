@@ -337,8 +337,9 @@ def list_all_incidents():
             "qc": "qc",
             "warehouse": "warehouse",
             "microbiology": "microbiology",
-            "production orals": "production orals",
-            "customer": "customer"
+            "production": "production",
+            "customer": "customer",
+            "Engineering": "Engineering"
         }
 
         def normalize_dept(dept):
@@ -572,72 +573,7 @@ def list_pending_incidents_by_department(department):
 
     except Exception as e:
         return jsonify({"message": f"Error fetching pending incidents by department: {e}"}), 500
-
-
-"""
-#@app.route("/api/incidents/rejected", methods=["GET"])
-@app.route("/api/incidents/rejected-by-department/<department>", methods=["GET"])
-def list_rejected_incidents_by_department(department):
-    try:
-        # incidents where the logged-in department is either the creator or the assigned dept
-        dept_docs = list(
-            department_selection_collection.find({
-                "$or": [
-                    {"selectedDept": department},
-                    {"department": department}
-                ]
-            })
-        )
-
-        incident_map = {}
-
-        for d in dept_docs:
-            incident_id = d.get("incident_id")
-            if not incident_id:
-                continue
-
-            if incident_id not in incident_map:
-                incident_map[incident_id] = {
-                    "created_by_department": d.get("selectedDept", "") or "",
-                    "assigned_departments": set(),
-                }
-
-            if d.get("department"):
-                incident_map[incident_id]["assigned_departments"].add(d.get("department"))
-
-        incident_ids = sorted(list(incident_map.keys()))
-
-        incidents = list(
-            incidents_collection.find({
-                "incident_id": {"$in": incident_ids},
-                "status": "rejected"
-            }).sort("updated_at", -1)
-        )
-
-        out = []
-        for d in incidents:
-            incident_id = d.get("incident_id")
-            meta = incident_map.get(incident_id, {})
-            assigned_departments = sorted(list(meta.get("assigned_departments", set())))
-
-            out.append({
-                "incident_id": incident_id,
-                "title": d.get("title", ""),
-                "status": d.get("status", "rejected"),
-                "created_at": d.get("created_at"),
-                "updated_at": d.get("updated_at"),
-                "created_by_department": meta.get("created_by_department", ""),
-                "assigned_to_department": ", ".join(assigned_departments) if assigned_departments else "",
-                "next_step": default_next_step("rejected"),
-            })
-
-        return jsonify(out), 200
-
-    except Exception as e:
-        return jsonify({"message": f"Error fetching rejected incidents by department: {e}"}), 500
-
-
-#@app.route("/api/incidents/action-required", methods=["GET"])
+    
 @app.route("/api/incidents/action-required-by-department/<department>", methods=["GET"])
 def list_action_required_incidents_by_department(department):
     try:
@@ -696,7 +632,7 @@ def list_action_required_incidents_by_department(department):
 
     except Exception as e:
         return jsonify({"message": f"Error fetching action required incidents by department: {e}"}), 500
-"""
+
 @app.route("/api/incidents/rejected-by-department/<department>", methods=["GET"])
 def list_rejected_incidents_by_department(department):
     try:
@@ -1049,50 +985,7 @@ def get_incidents_by_other_department(department):
     except Exception as e:
         return jsonify({"message": f"Error fetching other department tickets: {e}"}), 500
 
-# -------------------- Incidents assigned to my department --------------------  
-"""
-@app.route("/api/incidents/assigned-to-department/<department>", methods=["GET"])
-def list_incidents_assigned_to_department(department):
-    try:
-        docs = list(
-            department_selection_collection.find({
-                "department": department,
-                "selectedDept": {"$ne": department}
-            })
-        )
 
-        # map incident_id -> selectedDept
-        incident_owner_map = {}
-        for d in docs:
-            incident_id = d.get("incident_id")
-            if incident_id and incident_id not in incident_owner_map:
-                incident_owner_map[incident_id] = d.get("selectedDept", "")
-
-        incident_ids = sorted(list(incident_owner_map.keys()))
-
-        incidents = list(
-            incidents_collection.find({"incident_id": {"$in": incident_ids}})
-            .sort("updated_at", -1)
-        )
-
-        out = []
-        for d in incidents:
-            incident_id = d.get("incident_id")
-            out.append({
-                "incident_id": incident_id,
-                "title": d.get("title", ""),
-                "status": d.get("status", "created"),
-                "created_at": d.get("created_at"),
-                "updated_at": d.get("updated_at"),
-                "next_step": compute_next_step_for_incident(incident_id),
-                "raised_by_department": incident_owner_map.get(incident_id, ""),
-            })
-
-        return jsonify(out), 200
-
-    except Exception as e:
-        return jsonify({"message": f"Error fetching incidents assigned to department: {e}"}), 500
-"""
 from flask import jsonify
 
 @app.route("/api/incidents/assigned-to-department/<dept>", methods=["GET"])
@@ -1324,43 +1217,6 @@ def build_progress_text(incident_id: str) -> str:
     return ", ".join(parts) if parts else "Created"
 
 
-"""
-@app.route("/api/incidents/<incident_id>/department-decision", methods=["POST"])
-def update_department_decision(incident_id):
-    data = request.json or {}
-    department = data.get("department")
-    decision_status = data.get("decision_status")
-    decision_by = data.get("decision_by", "")
-    decision_comment = data.get("decision_comment", "")
-
-    allowed = {"pending", "under_review", "approved", "rejected"}
-    if not department or decision_status not in allowed:
-        return jsonify({"message": "department and valid decision_status are required"}), 400
-
-    try:
-        result = department_selection_collection.update_one(
-            {"incident_id": incident_id, "department": department},
-            {
-                "$set": {
-                    "decision_status": decision_status,
-                    "decision_by": decision_by,
-                    "decision_comment": decision_comment,
-                    "decision_at": now_utc(),
-                    "updated_at": now_utc(),
-                }
-            }
-        )
-
-        if result.matched_count == 0:
-            return jsonify({"message": "Department assignment not found"}), 404
-
-        recalculate_incident_status(incident_id)
-
-        return jsonify({"message": "Department decision updated"}), 200
-
-    except Exception as e:
-        return jsonify({"message": f"Error updating department decision: {e}"}), 500
-"""
 
 # -------------------- 2) GENERAL INFORMATION --------------------
 @app.route("/api/general/<incident_id>", methods=["GET"])

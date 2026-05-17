@@ -11,9 +11,10 @@ const DepartmentPage = () => {
     "Quality Control",
     "Warehouse",
     "Regulatory Affairs",
-    "Production Orals",
+    "Production",
     "Microbiology",
     "Personnel and administration",
+    "Engineering",
     "Customer",
   ];
 

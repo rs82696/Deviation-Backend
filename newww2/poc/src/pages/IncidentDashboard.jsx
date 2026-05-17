@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
-//const API_BASE = "http://127.0.0.1:5000";
-const API_BASE = "https://deviation-backend-z706.onrender.com";
+const API_BASE = "http://127.0.0.1:5000";
+//const API_BASE = "https://deviation-backend-z706.onrender.com";
 
 const IncidentDashboard = () => {
   const navigate = useNavigate();

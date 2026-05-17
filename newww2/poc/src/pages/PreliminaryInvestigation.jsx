@@ -3,11 +3,11 @@ import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import "./PreliminaryInvestigation.css";
 
-//const API_BASE = "http://127.0.0.1:5000";
-const API_BASE = "https://deviation-backend-z706.onrender.com";
+const API_BASE = "http://127.0.0.1:5000";
+//const API_BASE = "https://deviation-backend-z706.onrender.com";
 
 export default function PreliminaryInvestigation() {
-   const viewOnly = localStorage.getItem("view_only") === "true";
+  const viewOnly = localStorage.getItem("view_only") === "true";
   const navigate = useNavigate();
   const incidentId = localStorage.getItem("incident_id") || "";
 
@@ -17,10 +17,79 @@ export default function PreliminaryInvestigation() {
   const [investigationNA, setInvestigationNA] = useState(false);
   const [reviewerNA, setReviewerNA] = useState(false);
 
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [attachments, setAttachments] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState("");
+
   const execFormat = (ref, command) => {
-    if (!ref.current) return;
+    if (!ref.current || viewOnly) return;
     ref.current.focus();
     document.execCommand(command, false, null);
+  };
+
+  const loadAttachments = async () => {
+    if (!incidentId) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/incidents/${incidentId}/attachments`);
+      if (!res.ok) return;
+
+      const data = await res.json();
+      setAttachments(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("Error loading attachments:", e);
+    }
+  };
+
+  const uploadSelectedFiles = async () => {
+    if (!incidentId) {
+      alert("Incident ID missing. Please start from Department page.");
+      return;
+    }
+
+    if (!selectedFiles.length) return;
+
+    setUploading(true);
+    setUploadErr("");
+
+    try {
+      for (const file of selectedFiles) {
+        const form = new FormData();
+        form.append("file", file);
+
+        const res = await fetch(`${API_BASE}/api/incidents/${incidentId}/attachments`, {
+          method: "POST",
+          body: form,
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || `Upload failed (${res.status})`);
+        }
+      }
+
+      await loadAttachments();
+      setSelectedFiles([]);
+    } catch (e) {
+      console.error(e);
+      setUploadErr(e.message || "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const deleteAttachment = async (attachmentId) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/attachments/${attachmentId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) return;
+      await loadAttachments();
+    } catch (e) {
+      console.error("Delete failed:", e);
+    }
   };
 
   // -------- LOAD EXISTING ----------
@@ -48,6 +117,7 @@ export default function PreliminaryInvestigation() {
     };
 
     load();
+    loadAttachments();
   }, [incidentId]);
 
   const savePreliminary = async () => {
@@ -113,30 +183,35 @@ export default function PreliminaryInvestigation() {
             </div>
           </div>
 
-          <div className={`capa-editor ${ (viewOnly ||investigationNA) ? "disabled" : ""}`}>
+          <div className={`capa-editor ${(viewOnly || investigationNA) ? "disabled" : ""}`}>
             <div className="capa-toolbar">
-              <button onClick={() => execFormat(investigationRef, "bold")}>
+              <button
+                disabled={viewOnly}
+                onClick={() => execFormat(investigationRef, "bold")}
+              >
                 <b>B</b>
               </button>
-              <button onClick={() => execFormat(investigationRef, "italic")}>
+              <button
+                disabled={viewOnly}
+                onClick={() => execFormat(investigationRef, "italic")}
+              >
                 <i>I</i>
               </button>
               <button
+                disabled={viewOnly}
                 onClick={() => execFormat(investigationRef, "underline")}
               >
                 <u>U</u>
               </button>
               <button
-                onClick={() =>
-                  execFormat(investigationRef, "insertUnorderedList")
-                }
+                disabled={viewOnly}
+                onClick={() => execFormat(investigationRef, "insertUnorderedList")}
               >
                 •
               </button>
               <button
-                onClick={() =>
-                  execFormat(investigationRef, "insertOrderedList")
-                }
+                disabled={viewOnly}
+                onClick={() => execFormat(investigationRef, "insertOrderedList")}
               >
                 1.
               </button>
@@ -146,6 +221,7 @@ export default function PreliminaryInvestigation() {
               ref={investigationRef}
               className="capa-editor-body"
               contentEditable={!viewOnly && !investigationNA}
+              suppressContentEditableWarning={true}
               data-placeholder="Enter preliminary investigation details..."
             />
           </div>
@@ -168,28 +244,35 @@ export default function PreliminaryInvestigation() {
             </div>
           </div>
 
-          <div className={`capa-editor ${ (viewOnly || reviewerNA ) ? "disabled" : ""}`}>
+          <div className={`capa-editor ${(viewOnly || reviewerNA) ? "disabled" : ""}`}>
             <div className="capa-toolbar">
-              <button onClick={() => execFormat(reviewerRef, "bold")}>
+              <button
+                disabled={viewOnly}
+                onClick={() => execFormat(reviewerRef, "bold")}
+              >
                 <b>B</b>
               </button>
-              <button onClick={() => execFormat(reviewerRef, "italic")}>
+              <button
+                disabled={viewOnly}
+                onClick={() => execFormat(reviewerRef, "italic")}
+              >
                 <i>I</i>
               </button>
-              <button onClick={() => execFormat(reviewerRef, "underline")}>
+              <button
+                disabled={viewOnly}
+                onClick={() => execFormat(reviewerRef, "underline")}
+              >
                 <u>U</u>
               </button>
               <button
-                onClick={() =>
-                  execFormat(reviewerRef, "insertUnorderedList")
-                }
+                disabled={viewOnly}
+                onClick={() => execFormat(reviewerRef, "insertUnorderedList")}
               >
                 •
               </button>
               <button
-                onClick={() =>
-                  execFormat(reviewerRef, "insertOrderedList")
-                }
+                disabled={viewOnly}
+                onClick={() => execFormat(reviewerRef, "insertOrderedList")}
               >
                 1.
               </button>
@@ -199,9 +282,145 @@ export default function PreliminaryInvestigation() {
               ref={reviewerRef}
               className="capa-editor-body"
               contentEditable={!viewOnly && !reviewerNA}
+              suppressContentEditableWarning={true}
               data-placeholder="Enter reviewer remarks..."
             />
           </div>
+        </section>
+
+        {/* Attachments */}
+        <section className="capa-section">
+          <div className="capa-section-header" style={{ alignItems: "flex-start" }}>
+            <h3>Attachments:</h3>
+          </div>
+
+          <div className="attach-row">
+            <input
+              type="file"
+              multiple
+              disabled={viewOnly}
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+
+                setSelectedFiles((prev) => {
+                  const seen = new Set(
+                    prev.map((f) => `${f.name}-${f.size}-${f.lastModified}`)
+                  );
+
+                  const merged = [...prev];
+
+                  for (const f of files) {
+                    const key = `${f.name}-${f.size}-${f.lastModified}`;
+                    if (!seen.has(key)) merged.push(f);
+                  }
+
+                  return merged;
+                });
+
+                e.target.value = "";
+              }}
+            />
+
+            {!viewOnly && (
+              <button
+                className="btn"
+                style={{ backgroundColor: "#2563eb", color: "white" }}
+                onClick={uploadSelectedFiles}
+                disabled={!selectedFiles.length || uploading}
+              >
+                {uploading
+                  ? "Uploading..."
+                  : `Upload ${selectedFiles.length ? `(${selectedFiles.length})` : ""}`}
+              </button>
+            )}
+
+            {!viewOnly && selectedFiles.length > 0 && (
+              <button
+                className="btn"
+                style={{ backgroundColor: "#6c757d", color: "white" }}
+                onClick={() => setSelectedFiles([])}
+                disabled={uploading}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {uploadErr && <p style={{ color: "red", marginTop: 10 }}>{uploadErr}</p>}
+
+          {!!selectedFiles.length && !viewOnly && (
+            <div style={{ marginTop: 10, fontSize: 14 }}>
+              <b>Selected:</b>
+              <ul style={{ marginTop: 6 }}>
+                {selectedFiles.map((f) => (
+                  <li
+                    key={f.name + f.size + f.lastModified}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      marginBottom: 6,
+                    }}
+                  >
+                    <span>{f.name}</span>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedFiles((prev) =>
+                          prev.filter(
+                            (x) =>
+                              !(
+                                x.name === f.name &&
+                                x.size === f.size &&
+                                x.lastModified === f.lastModified
+                              )
+                          )
+                        )
+                      }
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        color: "#dc2626",
+                        fontSize: 18,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        lineHeight: 1,
+                      }}
+                      title="Remove"
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {!!attachments.length && (
+            <div style={{ marginTop: 12 }}>
+              <b>Uploaded:</b>
+              <ul className="attach-list">
+                {attachments.map((a) => (
+                  <li key={a._id} className="attach-item">
+                    <a href={a.url} target="_blank" rel="noreferrer">
+                      {a.filename}
+                    </a>
+
+                    {!viewOnly && (
+                      <button
+                        className="attach-del"
+                        onClick={() => deleteAttachment(a._id)}
+                        title="Delete attachment"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
 
         {/* Buttons */}
@@ -209,7 +428,6 @@ export default function PreliminaryInvestigation() {
           <button
             className="btn"
             style={{ backgroundColor: "#6c757d", color: "white" }}
-            //disabled={viewOnly}
             onClick={() => navigate("/deviation")}
           >
             Back
